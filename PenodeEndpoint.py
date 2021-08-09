@@ -56,6 +56,7 @@ def responseGenerator(task, output):
         response['error'] = None
     elif task=='stats':
         pass
+    print(response)
 
 
 client = Penode()
