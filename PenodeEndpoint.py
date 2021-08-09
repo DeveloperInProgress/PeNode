@@ -1,4 +1,4 @@
-from Penode import Penode
+from PenodeClient import PenodeClient
 import argparse
 
 def downloadImage(args):
@@ -59,7 +59,8 @@ def responseGenerator(task, output):
     print(response)
 
 
-client = Penode()
+
+client = PenodeClient()
 parser = argparse.ArgumentParser()
 subparser = parser.add_subparsers()
 
