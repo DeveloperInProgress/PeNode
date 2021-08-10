@@ -1,2 +1,2 @@
-#!bin/bash
-PenodeEndpoint.py "$@"
+#!/usr/bin/bash
+python3 PenodeEndpoint.py "$@"

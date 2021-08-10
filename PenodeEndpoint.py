@@ -25,9 +25,10 @@ def stopContainer(args):
     output = client.forceStop(args.n)
     return responseGenerator('stop',output)
 
-def streamStats():
+def streamStats(args):
     #todo: stream resource usage stats for all containers
-    return "coming soon"
+    for s in client.streamStats():
+        print(s)
     
 def responseGenerator(task, output):
     response = {}
@@ -65,7 +66,7 @@ parser = argparse.ArgumentParser()
 subparser = parser.add_subparsers()
 
 parser_download = subparser.add_parser('download')
-parser_download.add_argument('imageName', required=True, help='Name of the image to be downloaded')
+parser_download.add_argument('imageName', help='Name of the image to be downloaded')
 parser_download.set_defaults(func=downloadImage)
 
 parser_run = subparser.add_parser('run')
@@ -86,3 +87,8 @@ parser_stop = subparser.add_parser('stop')
 parser_stop.add_argument('-n',required=True,help='Name of the container')
 parser_stop.set_defaults(func=stopContainer)
 
+parser_stats = subparser.add_parser('stats')
+parser_stats.set_defaults(func=streamStats)
+
+args = parser.parse_args()
+args.func(args)

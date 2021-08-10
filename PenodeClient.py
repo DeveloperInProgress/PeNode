@@ -16,7 +16,7 @@ class PenodeClient:
             imageName,
             name=name,
             ports={
-                str(containerPort)+'/'+self.params['protocol']:None 
+                str(containerPort)+'/tcp':None 
             },
             detach = True
         )
@@ -38,5 +38,6 @@ class PenodeClient:
         container = self.dockerClient.containers.get(containerName)
         return self.dockerLowClient.start(container=container.id) 
 
-    def streamStats(self,id):
-        return self.dockerLowClient.stats(id) 
+    def streamStats(self):
+        for c in self.dockerClient.containers.list():
+            yield self.dockerLowClient.stats(c.id)
