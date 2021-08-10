@@ -40,4 +40,4 @@ class PenodeClient:
 
     def streamStats(self):
         for c in self.dockerClient.containers.list():
-            yield self.dockerLowClient.stats(c.id)
+            yield c.name,self.dockerLowClient.stats(c.id)

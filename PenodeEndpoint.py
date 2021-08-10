@@ -26,9 +26,11 @@ def stopContainer(args):
     return responseGenerator('stop',output)
 
 def streamStats(args):
-    #todo: stream resource usage stats for all containers
-    for s in client.streamStats():
-        print(s)
+    stats = {}
+    for name,s in client.streamStats():
+        stats[name] = s
+    
+    -
     
 def responseGenerator(task, output):
     response = {}
