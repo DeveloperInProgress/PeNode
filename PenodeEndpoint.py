@@ -1,96 +1,35 @@
-from PenodeClient import PenodeClient
-import argparse
+import socket, ssl
 
-def downloadImage(args):
-    output = client.pullImage(args.imageName)
-    return responseGenerator('download', output)
+class PenodeEndpoint:
+    def __init__(self):
+        self.ws = socket.create_server(('127.0.0.1',24))
+        self.openConns = {}
 
-def runImage(args):
-    output = client.runContainer(
-        args.i,
-        args.n,
-        args.p
-    )
-    return responseGenerator('run',output)
+    def listenForConnections(self):
+        self.ws.listen(1)
+        conn, addr = self.ws.accept()
+        self.connectClient(self,addr)
+        self.listenForConnections()
 
-def getPort(args):
-    output = client.portBindings(args.n)
-    return responseGenerator('port',output)
+    def connectClient(self,addr):
+        if not authenticate:
+            conn.close()
+        else:
+            self.openConns[addr] = conn 
 
-def startContainer(args):
-    output = client.startContainer(args.n)
-    return responseGenerator('start',output)
+    def disconnectClient(self,addr):
+        if addr in self.openConns:
+            openConns[addr].close()
+            del openConns[addr]
 
-def stopContainer(args):
-    output = client.forceStop(args.n)
-    return responseGenerator('stop',output)
+    def authenticate(self,addr):
+        return True
 
-def streamStats(args):
-    stats = {}
-    for name,s in client.streamStats():
-        stats[name] = s
-    
-    -
-    
-def responseGenerator(task, output):
-    response = {}
-    if task=='download':
-        #output is the Image pulled
-        response['data'] = output.id 
-        response['message'] = 'Download complete!'
-        response['error'] = None
-    elif task=='run':
-        #output is the Container running
-        response['data'] = output.id
-        response['message'] = 'Container running succesfully!'
-        response['error'] = None 
-    elif task=='port':
-        #output is the port attached to the container
-        response['data'] = output
-        response['message'] = 'Port retrieved succesfully!'
-        response['error'] = None 
-    elif task=='start':
-        response['data'] = None
-        response['message'] = 'Container started succesfully!'
-        response['error'] = None 
-    elif task=='stop':
-        response['data'] = None
-        response['message'] = 'Container stopped succesfully!'
-        response['error'] = None
-    elif task=='stats':
-        pass
-    print(response)
+    def sendData(self,addr,data):
+        if addr in self.openConns:
+            self.openConns[addr].send(data) 
 
-
-
-client = PenodeClient()
-parser = argparse.ArgumentParser()
-subparser = parser.add_subparsers()
-
-parser_download = subparser.add_parser('download')
-parser_download.add_argument('imageName', help='Name of the image to be downloaded')
-parser_download.set_defaults(func=downloadImage)
-
-parser_run = subparser.add_parser('run')
-parser_run.add_argument('-i',required=True,help='Name of the image to run')
-parser_run.add_argument('-n',required=True,help='Name to be given to container')
-parser_run.add_argument('-p',required=True,type=int,help='Container port to be exposed')
-parser_run.set_defaults(func=runImage)
-
-parser_port = subparser.add_parser('port')
-parser_port.add_argument('-n',required=True,help='Name of the container')
-parser_port.set_defaults(func=getPort)
-
-parser_start = subparser.add_parser('start')
-parser_start.add_argument('-n',required=True,help='Name of the container')
-parser_start.set_defaults(func=startContainer)
-
-parser_stop = subparser.add_parser('stop')
-parser_stop.add_argument('-n',required=True,help='Name of the container')
-parser_stop.set_defaults(func=stopContainer)
-
-parser_stats = subparser.add_parser('stats')
-parser_stats.set_defaults(func=streamStats)
-
-args = parser.parse_args()
-args.func(args)
+    def recvData(self,addr):
+        while True:
+            data = self.openConns[addr].recv(1024)
+            
